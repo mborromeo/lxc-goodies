@@ -1,6 +1,10 @@
 # -*- mode: sh -*-
 
 #
+# This file is in public domain
+#
+
+#
 # Name of bridge for containers (host side)
 #
 BRIDGE_IFACE=br0
