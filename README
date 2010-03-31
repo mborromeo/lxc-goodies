@@ -1,0 +1,38 @@
+= lxc-goodies =
+
+Set of scripts turning LXC into handy experimentation stand.
+
+All VMs created:
+ * have SSH enabled and specified public key copied into.
+ * are connected to bridge with masquerading enabled.
+ * advertise <name>.local name through Zeroconf
+ * acquire IP using DHCP running on bridge interface.
+
+= Quick start =
+
+== Preparations ==
+
+0. Make sure you've got Debian or Ubuntu.
+0.5. apt-get install lxc dnsmasq-base brctl debootstrap
+
+1. Edit lxc-goodies-config
+
+2. # lxc-goodies-update-fstab
+
+3. # lxc-goodies-update-interfaces
+
+== Create VM ==
+
+# lxc-goodies-mkdebian <name> lenny
+
+== Run VM ==
+
+# lxc-start -n <name>
+
+== Attach to VM ==
+
+# lxc-console -n <name>
+
+or
+
+$ ssh root@<name>.local

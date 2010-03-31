@@ -1,0 +1,74 @@
+#!/bin/sh
+set -e
+
+#
+# This script generates LXC bridge entry in /etc/network/interfaces
+#
+
+PATH=$PATH:/usr/share/lxc-goodies
+. lxc-goodies-config
+
+I=/etc/network/interfaces
+TI=$I.tmp
+
+if grep -q "^auto $BRIDGE_IFACE" $I; then
+    awk '
+BEGIN {
+    copy=1
+}
+/^auto '$BRIDGE_IFACE'/ {
+    copy=0
+}
+/^auto / && ! /^auto '$BRIDGE_IFACE'/ {
+    copy=1
+}
+{
+    if (copy) print
+}' < $I > $TI
+else
+    cp $I $TI
+fi
+
+DNSMASQ_PIDFILE=$DNSMASQ_PID_DIR/dnsmasq.$BRIDGE_IFACE.pid
+DNSMASQ_CONF=/etc/network/dnsmasq.$BRIDGE_IFACE.config
+
+cat <<EOF >> $TI
+auto $BRIDGE_IFACE
+iface $BRIDGE_IFACE inet static
+  address $BRIDGE_ADDRESS
+  netmask $BRIDGE_NETMASK
+  bridge_ports none
+  bridge_fd 0
+
+  pre-down kill \$(cat $DNSMASQ_PIDFILE); rm $DNSMASQ_PIDFILE; :
+
+  post-up dnsmasq -C $DNSMASQ_CONF& :
+  post-up echo 1 > /proc/sys/net/ipv4/ip_forward; :
+EOF
+
+for i in $OUTGOING_IFACES; do
+    cat <<EOF >> $TI
+  post-up iptables -t nat -A POSTROUTING -o $i -j MASQUERADE; :
+EOF
+done
+
+cat <<EOF > $DNSMASQ_CONF
+# network
+interface=$BRIDGE_IFACE
+bind-interfaces
+
+# misc
+pid-file=$DNSMASQ_PIDFILE
+
+# dns
+no-hosts
+clear-on-reload
+no-negcache
+
+# dhcp
+dhcp-range=$BRIDGE_DHCP_RANGE
+dhcp-authoritative
+no-ping
+EOF
+
+mv $TI $I

@@ -1,0 +1,84 @@
+#!/bin/sh
+set -e
+
+#
+# Creates new debian instance, fixes LXC-incompatible stuff, installs SSH
+# server, provides public SSH key and sets up networking and Zeroconf.
+#
+# Usage:
+#
+#  user@host $ sudo lxc-goodies-mkdebian vm1 sid
+#  ...
+#  user@host $ sudo lxc-start -n vm1 -d
+#  user@host $ ssh root@vm1.local
+#  ...
+#  root@vm1 #
+#
+
+PATH=$PATH:/usr/share/lxc-goodies
+. lxc-goodies-config
+
+if [ $# -lt 1 -o $# -gt 3 ]; then
+   echo "Usage: $0 <name> [<distribution>]"
+   exit 1
+fi
+
+if [ ! -f /usr/sbin/debootstrap ]; then
+    echo "Please install debootstrap first."
+    exit 1
+fi
+
+NAME="$1"
+if [ "x$2" = x ]; then
+    DISTRO=sid
+else
+    DISTRO="$2"
+fi
+
+LXC_ROOT=/var/lib/lxc
+
+if [ -e "$LXC_ROOT/$1" ]; then
+    echo "$1 already exists."
+    exit 1
+fi
+
+ROOTFS=$LXC_ROOT/$1/rootfs
+
+mkdir -p "$LXC_ROOT/$1"
+
+cat <<EOF > "$LXC_ROOT/$1/config"
+lxc.utsname=$1
+
+lxc.network.type=veth
+lxc.network.flags=up
+lxc.network.link=$BRIDGE_IFACE
+
+lxc.pts=256
+lxc.tty=4
+
+lxc.rootfs=$ROOTFS
+EOF
+
+debootstrap --include openssh-server,avahi-daemon --exclude udev $DISTRO $ROOTFS $DEBIAN_MIRROR
+
+echo $NAME > $ROOTFS/etc/hostname
+
+cat <<EOF > $ROOTFS/etc/network/interfaces
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+EOF
+
+sed -i -e 's/^root:\*:/root::/' $ROOTFS/etc/shadow
+
+touch $ROOTFS/root/.hushlogin
+
+mkdir -m 700 $ROOTFS/root/.ssh
+
+#
+# FIXME: hardcoded
+#
+echo "$ROOT_SSH_KEY" > $ROOTFS/root/.ssh/authorized_keys
+chmod 600 $ROOTFS/root/.ssh/authorized_keys

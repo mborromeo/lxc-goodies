@@ -1,0 +1,11 @@
+#!/bin/sh
+
+PATH=$PATH:/usr/share/lxc-goodies
+. lxc-goodies-config
+
+if ! grep -q $CGROUP_LOCATION /etc/fstab; then
+    cat <<EOF >> /etc/fstab
+cgroup $CGROUP_LOCATION cgroup defaults 0 0
+EOF
+    mount $CGROUP_LOCATION
+fi
