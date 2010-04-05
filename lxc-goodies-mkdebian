@@ -71,6 +71,7 @@ lxc.utsname=$1
 lxc.network.type=veth
 lxc.network.flags=up
 lxc.network.link=$BRIDGE_IFACE
+lxc.network.veth.pair=veth-$1
 
 lxc.pts=256
 lxc.tty=4
