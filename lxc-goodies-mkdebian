@@ -109,9 +109,6 @@ touch $ROOTFS/root/.hushlogin
 
 mkdir -m 700 $ROOTFS/root/.ssh
 
-#
-# FIXME: hardcoded
-#
 echo "$ROOT_SSH_KEY" > $ROOTFS/root/.ssh/authorized_keys
 chmod 600 $ROOTFS/root/.ssh/authorized_keys
 
