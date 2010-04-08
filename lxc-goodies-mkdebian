@@ -116,4 +116,4 @@ chmod 600 $ROOTFS/root/.ssh/authorized_keys
 # FIXME: rlimits are not virtualized in LXC. Disable using RLIMIT_NPROC until it
 # is fixed.
 #
-echo "DAEMON='/usr/sbin/avahi-daemon --no-rlimits'" >> $ROOTFS/etc/default/avahi-daemon
+# echo "DAEMON='/usr/sbin/avahi-daemon --no-rlimits'" >> $ROOTFS/etc/default/avahi-daemon
