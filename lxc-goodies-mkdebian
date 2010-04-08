@@ -65,12 +65,15 @@ ROOTFS=$LXC_ROOT/$1/rootfs
 
 mkdir -p "$LXC_ROOT/$1"
 
+MAC=$(echo -n '02:'; hexdump -n5 /dev/urandom -e '6/1 "%02X:"' | sed -e 's/:$//')
+
 cat <<EOF > "$LXC_ROOT/$1/config"
 lxc.utsname=$1
 
 lxc.network.type=veth
 lxc.network.flags=up
 lxc.network.link=$BRIDGE_IFACE
+lxc.network.hwaddr=$MAC
 lxc.network.veth.pair=veth-$1
 
 lxc.pts=256
