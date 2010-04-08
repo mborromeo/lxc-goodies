@@ -81,6 +81,15 @@ EOF
 
 debootstrap --include openssh-server,avahi-daemon --exclude udev $DISTRO $ROOTFS $DEBIAN_MIRROR
 
+#
+# Create ttyX for everything after lenny
+#
+if [ $DISTRO != lenny ]; then
+  for i in 1 2 3 4 5 6; do
+    mknod -m 666 $ROOTFS/dev/tty$i c 4 $i
+  done
+fi
+
 echo $NAME > $ROOTFS/etc/hostname
 
 cat <<EOF > $ROOTFS/etc/network/interfaces
