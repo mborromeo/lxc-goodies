@@ -82,7 +82,7 @@ lxc.tty=4
 lxc.rootfs=$ROOTFS
 EOF
 
-debootstrap --include openssh-server,avahi-daemon --exclude udev $DISTRO $ROOTFS $DEBIAN_MIRROR
+debootstrap --include openssh-server,avahi-daemon,libnss-mdns --exclude udev $DISTRO $ROOTFS $DEBIAN_MIRROR
 
 #
 # Create ttyX for everything after lenny
