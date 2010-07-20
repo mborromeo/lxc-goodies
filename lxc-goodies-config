@@ -40,7 +40,7 @@ CGROUP_LOCATION=/var/local/cgroup
 # lxc-goodies-mkdebian: debian mirror. Default value assumes there's approx
 # running on host system.
 #
-DEBIAN_MIRROR=http://${BRIDGE_ADDRESS}:9999/debian/
+DEBIAN_MIRROR=http://ftp.us.debian.org/debian/
 #
 # lxc-goodies-mkdebian: SSH key to put to root's authorized-keys.
 #
